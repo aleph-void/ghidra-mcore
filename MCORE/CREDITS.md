@@ -8,15 +8,15 @@ changes are listed below.
 
 | | |
 |---|---|
-| Source | Ghidra pull request [#9270](https://github.com/NationalSecurityAgency/ghidra/pull/9270) "Add MCORE processor", head commit `e0edb1d84aed1c4f8a3f0684c0ac48d74896a1c5` (2026-06-11) |
+| Source | [CUB3D/ghidra-mcore](https://github.com/CUB3D/ghidra-mcore) at `df3eddc` (2026-06-11), whose `MCORE/` files are the ones in Ghidra pull request [#9270](https://github.com/NationalSecurityAgency/ghidra/pull/9270) "Add MCORE processor" (head commit `e0edb1d84aed1c4f8a3f0684c0ac48d74896a1c5`), plus extension packaging |
 | License | Apache License 2.0 (Ghidra contribution terms; the same files are published Apache-2.0 as [CUB3D/ghidra-mcore](https://github.com/CUB3D/ghidra-mcore)); `LICENSE` is Ghidra's Apache-2.0 text |
 | Original author | Callum Thomson ([@CUB3D](https://github.com/CUB3D)): the M-CORE SLEIGH specification, cspec, pspec, ldefs and ELF opinion (2026) |
-| Compared, not used | [CUB3D/ghidra-mcore](https://github.com/CUB3D/ghidra-mcore) (the same specification packaged for Ghidra's Processors directory); [z3DD3r/mcore-elf](https://github.com/z3DD3r/mcore-elf) sample binaries (no license, so not used) |
+| Compared, not used | [z3DD3r/mcore-elf](https://github.com/z3DD3r/mcore-elf) sample binaries (no license, so not used) |
 | Reference material | M-CORE Reference Manual (Motorola MCORERM/AD, as linked from the specification) for encodings and semantics; GNU binutils 2.45 `opcodes/mcore-*` and `bfd/elf32-mcore.c` (GPL-3.0; used as the test oracle and for the relocation formulas, not copied); GDB 17.2 `sim/mcore/interp.c` (GPL-3.0; for the simulator service calls, not copied); GCC 14 `config/mcore` for the calling convention and DWARF numbering |
 
-The pull request's files are the first commit of the Ghidra-Rare fork, unchanged at their
-original paths (`Ghidra/Processors/MCORE/...`); every Ghidra-Rare change is a separate commit on
-top.
+This repository is a fork of CUB3D/ghidra-mcore with its full history; every Ghidra-Rare change
+is a separate commit on top, inside `MCORE/`. The changes were made and tested against the pull
+request's files, which match CUB3D/ghidra-mcore's `MCORE/` specification files exactly.
 
 ## Ghidra-Rare changes
 

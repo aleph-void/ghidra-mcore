@@ -1,7 +1,8 @@
 # Ghidra-Rare notes: Motorola M-CORE
 
-This is the Ghidra-Rare fork of Ghidra pull request
-[#9270](https://github.com/NationalSecurityAgency/ghidra/pull/9270) (M-CORE support by CUB3D).
+This is the Ghidra-Rare fork of [CUB3D/ghidra-mcore](https://github.com/CUB3D/ghidra-mcore),
+the M-CORE support CUB3D also submitted as Ghidra pull request
+[#9270](https://github.com/NationalSecurityAgency/ghidra/pull/9270).
 Ghidra-Rare tested it against GNU binutils, the M-CORE Reference Manual and programs built with
 GCC 14 and newlib, and fixed what the tests found. Authors, upstream commit and the list of
 changes are in [CREDITS.md](CREDITS.md); the upstream limitations and their status are in
