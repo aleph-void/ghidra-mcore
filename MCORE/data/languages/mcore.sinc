@@ -71,13 +71,27 @@ macro psr_write(v) {
 	C = (v & 1) != 0;
 }
 
-define pcodeop bkpt;
+# Exception entry (reference manual 4.2): PSR and the exception PC are saved in EPSR/EPC; PSR
+# gets S set, TM, TC, EE and IE cleared and VEC = vector number; execution continues at the
+# address in the vector table at VBR + 4 * vector (its low bit selects the register file, AF).
+# The handler returns with rte; for trap, bkpt and divide by zero EPC is the instruction itself.
+macro exception(vec) {
+	local p:4;
+	psr_read(p);
+	EPSR = p;
+	EPC = inst_start;
+	psr_write((p & 0xff801ebf) | 0x80000000 | (vec << 16));
+	local h:4 = *:4 (VBR + (vec << 2));
+	PSR = (PSR & 0xfffffffd) | ((h & 1) << 1);
+	local tgt:4 = h & 0xfffffffe;
+	call [tgt];
+}
+
 define pcodeop sync;
 define pcodeop stop;
 define pcodeop wait;
 define pcodeop doze;
 define pcodeop idly4;
-define pcodeop trap;
 define pcodeop h_exec;
 define pcodeop h_ret;
 define pcodeop h_call;
@@ -86,7 +100,8 @@ define pcodeop h_st;
 
 # ---------------------------------------------------------------------------------------------
 # 0000 0000 0000 xxxx: no operands
-:bkpt is op0_15=0x0000 { bkpt(); }
+# breakpoint exception (vector 7)
+:bkpt is op0_15=0x0000 { exception(7:4); }
 :sync is op0_15=0x0001 { sync(); }
 :rte is op0_15=0x0002 {
 	local npc:4 = EPC;
@@ -104,8 +119,11 @@ define pcodeop h_st;
 :doze is op0_15=0x0006 { doze(); }
 # 0x0007 is not in the reference manual; binutils decodes it as idly4
 :idly4 is op0_15=0x0007 { idly4(); }
-# trap #n: system call through vector 0x40 + 4n; execution resumes after it
-:trap vec2 is op2_15=0x0002 & vec2 { trap(vec2:1); }
+# trap #n: instruction trap exception (vector 16 + n)
+:trap vec2 is op2_15=0x0002 & vec2 {
+	local v:4 = 16 + vec2;
+	exception(v);
+}
 
 # 0000 0000 0xxx rrrr: one register
 :mvc regX is op4_15=0x002 & regX { regX = zext(C); }
@@ -318,9 +336,10 @@ psr_mask: "ee,fe,ie" is psrf=7 { local m:4 = 0x150; export m; }
 :bmaski regX, 32 is op4_15=0x2c0 & regX { regX = 0xffffffff; }
 :divu regX, "r1" is op4_15=0x2c1 & regX {
 	local d:4 = r1;
-	if (d == 0) goto <z>;
+	if (d != 0) goto <ok>;
+	exception(3:4);	# divide-by-zero exception (vector 3)
+<ok>
 	regX = regX / d;
-<z>
 }
 :bmaski regX, uimm5 is op7_15=0x059 & uimm5 & regX { regX = (1:4 << uimm5) - 1; }
 :bmaski regX, uimm5 is op8_15=0x2d & uimm5 & regX { regX = (1:4 << uimm5) - 1; }
@@ -328,9 +347,10 @@ psr_mask: "ee,fe,ie" is psrf=7 { local m:4 = 0x150; export m; }
 :bclri regX, uimm5 is op9_15=0x18 & uimm5 & regX { regX = regX & ~(1:4 << uimm5); }
 :divs regX, "r1" is op4_15=0x321 & regX {
 	local d:4 = r1;
-	if (d == 0) goto <z>;
+	if (d != 0) goto <ok>;
+	exception(3:4);	# divide-by-zero exception (vector 3)
+<ok>
 	regX = regX s/ d;
-<z>
 }
 # bgeni rx,n (n = 7..31; 0..6 are movi)
 :bgeni regX, 7 is op4_15=0x327 & regX { regX = 0x80; }
