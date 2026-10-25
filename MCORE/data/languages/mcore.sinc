@@ -125,6 +125,22 @@ define pcodeop h_st;
 	exception(v);
 }
 
+# 0101 0000 nnnn nnnn: GNU simulator service calls (sim/mcore/interp.c util()), used by newlib's
+# libgloss for the simulator (_exit, utime, _read/_write/_open/... through r1). 0x5xxx is
+# unassigned in the M-CORE opcode map (an illegal instruction on hardware) and objdump prints
+# .short; they are decoded so that programs linked with libgloss analyse and decompile.
+define pcodeop sim_exit;
+define pcodeop sim_utime;
+define pcodeop sim_syscall;
+define pcodeop sim_service;
+# exit(r2): the simulator stops
+:sim_util 0x0 is op0_15=0x5000 { sim_exit(r2); goto inst_start; }
+:sim_util 0x3 is op0_15=0x5003 { r2 = sim_utime(); }
+# system call r1 with arguments r2-r5, result in r2
+:sim_util 0xff is op0_15=0x50ff { r2 = sim_syscall(r1, r2, r3, r4, r5); }
+# 0x01 printf and 0x02 scanf are unimplemented in the simulator, others ignored
+:sim_util disp8 is op8_15=0x50 & disp8 { sim_service(disp8:1); }
+
 # 0000 0000 0xxx rrrr: one register
 :mvc regX is op4_15=0x002 & regX { regX = zext(C); }
 :mvcv regX is op4_15=0x003 & regX { regX = zext(!C); }
